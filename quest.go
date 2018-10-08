@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/Skarlso/google-oauth-go-sample/handlers"
 	"github.com/Skarlso/google-oauth-go-sample/middleware"
 	"github.com/gin-gonic/contrib/sessions"
@@ -8,6 +10,8 @@ import (
 )
 
 func main() {
+	// to change the flags on the default logger
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	router := gin.Default()
 	store := sessions.NewCookieStore([]byte(handlers.RandToken(64)))
 	store.Options(sessions.Options{
@@ -22,8 +26,8 @@ func main() {
 	router.LoadHTMLGlob("templates/*")
 
 	router.GET("/", handlers.IndexHandler)
-	router.GET("/login", handlers.LoginHandler)
-	router.GET("/auth", handlers.AuthHandler)
+	router.GET("/auth/google/login", handlers.LoginHandler)
+	router.GET("/auth/google/callback", handlers.AuthHandler)
 
 	authorized := router.Group("/battle")
 	authorized.Use(middleware.AuthorizeRequest())

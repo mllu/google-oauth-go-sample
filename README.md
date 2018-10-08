@@ -25,9 +25,11 @@ To obtain these credentials, please navigate to this site and follow the procedu
 
 To gather all the libraries this project uses, simply execute from the root: `go get -v ./...`
 
+To install and run MongoDB, please refer to [official documents](https://docs.mongodb.com/manual/administration/install-community/). This sample require a local MongoDB running.
+
 # Running
 
-To run it, simply build & run and navigate to http://127.0.0.1:9090/login, nothing else should be required.
+To run it, simply build & run and navigate to http://127.0.0.1:9090/auth/google/login, nothing else should be required.
 
 ```
 go build

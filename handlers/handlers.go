@@ -48,7 +48,7 @@ func init() {
 	conf = &oauth2.Config{
 		ClientID:     cred.Cid,
 		ClientSecret: cred.Csecret,
-		RedirectURL:  "http://127.0.0.1:9090/auth",
+		RedirectURL:  "http://127.0.0.1:9090/auth/google/callback",
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.email", // You have to select your own scope from here -> https://developers.google.com/identity/protocols/googlescopes#google_sign-in
 		},
@@ -66,6 +66,8 @@ func AuthHandler(c *gin.Context) {
 	// Handle the exchange code to initiate a transport.
 	session := sessions.Default(c)
 	retrievedState := session.Get("state")
+	// debug: print the RawQuery passed from login page
+	log.Println("RawQuery:", c.Request.URL.RawQuery)
 	queryState := c.Request.URL.Query().Get("state")
 	if retrievedState != queryState {
 		log.Printf("Invalid session state: retrieved: %s; Param: %s", retrievedState, queryState)
@@ -89,6 +91,8 @@ func AuthHandler(c *gin.Context) {
 	}
 	defer userinfo.Body.Close()
 	data, _ := ioutil.ReadAll(userinfo.Body)
+	// debug: print the response body
+	log.Printf("data:\n %s", string(data))
 	u := structs.User{}
 	if err = json.Unmarshal(data, &u); err != nil {
 		log.Println(err)
@@ -124,6 +128,8 @@ func LoginHandler(c *gin.Context) {
 	session.Set("state", state)
 	session.Save()
 	link := getLoginURL(state)
+	// debug: print the link
+	log.Println("link:", link)
 	c.HTML(http.StatusOK, "auth.tmpl", gin.H{"link": link})
 }
 
