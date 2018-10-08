@@ -1,16 +1,20 @@
 package handlers
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
-	"github.com/Skarlso/google-oauth-go-sample/database"
-	"github.com/Skarlso/google-oauth-go-sample/structs"
+	"github.com/mllu/google-oauth-go-sample/database"
+	"github.com/mllu/google-oauth-go-sample/structs"
+
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
@@ -48,9 +52,12 @@ func init() {
 	conf = &oauth2.Config{
 		ClientID:     cred.Cid,
 		ClientSecret: cred.Csecret,
-		RedirectURL:  "http://127.0.0.1:9090/auth/google/callback",
+		RedirectURL:  "http://127.0.0.1:9090/callback",
 		Scopes: []string{
-			"https://www.googleapis.com/auth/userinfo.email", // You have to select your own scope from here -> https://developers.google.com/identity/protocols/googlescopes#google_sign-in
+			// You have to select your own scope from here
+			//-> https://developers.google.com/identity/protocols/googlescopes#google_sign-in
+			"https://www.googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/cloud-platform",
 		},
 		Endpoint: google.Endpoint,
 	}
@@ -81,6 +88,13 @@ func AuthHandler(c *gin.Context) {
 		c.HTML(http.StatusBadRequest, "error.tmpl", gin.H{"message": "Login failed. Please try again."})
 		return
 	}
+
+	// save the token
+	session.Set("AccessToken", tok.AccessToken)
+	session.Set("RefreshToken", tok.RefreshToken)
+	session.Set("TokenType", tok.TokenType)
+	session.Set("Expiry", tok.Expiry.Format(time.RFC3339))
+	session.Save()
 
 	client := conf.Client(oauth2.NoContext, tok)
 	userinfo, err := client.Get("https://www.googleapis.com/oauth2/v3/userinfo")
@@ -138,4 +152,29 @@ func FieldHandler(c *gin.Context) {
 	session := sessions.Default(c)
 	userID := session.Get("user-id")
 	c.HTML(http.StatusOK, "field.tmpl", gin.H{"user": userID})
+}
+
+// ListStuff is a handler for listing stuff.
+func ListBucket(c *gin.Context) {
+	ctx := context.Background()
+	session := sessions.Default(c)
+	token := new(oauth2.Token)
+	token.AccessToken = session.Get("AccessToken").(string)
+	token.RefreshToken = session.Get("RefreshToken").(string)
+	token.RefreshToken = session.Get("RefreshToken").(string)
+	t := session.Get("Expiry").(string)
+	token.Expiry, _ = time.Parse(time.RFC3339, t)
+	token.TokenType = session.Get("TokenType").(string)
+	client := conf.Client(ctx, token)
+	bucket, err := client.Get("https://www.googleapis.com/storage/v1/b/oauth2-go-sample")
+	if err != nil {
+		log.Println(err)
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	defer bucket.Body.Close()
+	data, _ := ioutil.ReadAll(bucket.Body)
+	// debug: print the response body
+	log.Printf("data:\n %s", string(data))
+	c.String(http.StatusOK, fmt.Sprintf("%s", data))
 }

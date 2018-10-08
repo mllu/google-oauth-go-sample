@@ -4,7 +4,7 @@ Web based version of [GoProgressQuest](https://github.com/Skarlso/goprogressques
 
 # Installation
 
-Simply `go get github.com/Skarlso/google-oauth-go-sample`.
+Simply `go get github.com/mllu/google-oauth-go-sample`.
 
 # Setup
 
@@ -29,7 +29,7 @@ To install and run MongoDB, please refer to [official documents](https://docs.mo
 
 # Running
 
-To run it, simply build & run and navigate to http://127.0.0.1:9090/auth/google/login, nothing else should be required.
+To run it, simply build & run and navigate to http://127.0.0.1:9090/login, nothing else should be required.
 
 ```
 go build

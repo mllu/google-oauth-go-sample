@@ -3,7 +3,8 @@ package database
 import (
 	"fmt"
 
-	"github.com/Skarlso/google-oauth-go-sample/structs"
+	"github.com/mllu/google-oauth-go-sample/structs"
+
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )

@@ -3,8 +3,9 @@ package main
 import (
 	"log"
 
-	"github.com/Skarlso/google-oauth-go-sample/handlers"
-	"github.com/Skarlso/google-oauth-go-sample/middleware"
+	"github.com/mllu/google-oauth-go-sample/handlers"
+	"github.com/mllu/google-oauth-go-sample/middleware"
+
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
@@ -26,13 +27,19 @@ func main() {
 	router.LoadHTMLGlob("templates/*")
 
 	router.GET("/", handlers.IndexHandler)
-	router.GET("/auth/google/login", handlers.LoginHandler)
-	router.GET("/auth/google/callback", handlers.AuthHandler)
+	router.GET("/login", handlers.LoginHandler)
+	router.GET("/callback", handlers.AuthHandler)
 
-	authorized := router.Group("/battle")
-	authorized.Use(middleware.AuthorizeRequest())
+	battleAuthorized := router.Group("/battle")
+	battleAuthorized.Use(middleware.AuthorizeRequest())
 	{
-		authorized.GET("/field", handlers.FieldHandler)
+		battleAuthorized.GET("/field", handlers.FieldHandler)
+	}
+
+	bucketAuthorized := router.Group("/bucket")
+	bucketAuthorized.Use(middleware.AuthorizeRequest())
+	{
+		bucketAuthorized.GET("/list", handlers.ListBucket)
 	}
 
 	router.Run("127.0.0.1:9090")
