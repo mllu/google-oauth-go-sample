@@ -23,9 +23,18 @@ To obtain these credentials, please navigate to this site and follow the procedu
 
 ## Dependencies
 
+##### Golang libraries
+
 To gather all the libraries this project uses, simply execute from the root: `go get -v ./...`
 
+##### MongoDB
+
 To install and run MongoDB, please refer to [official documents](https://docs.mongodb.com/manual/administration/install-community/). This sample require a local MongoDB running.
+
+Sample command to start MongoDB after installation:
+```
+mongod --dbpath ~/tmp/mongodb
+```
 
 # Running
 
